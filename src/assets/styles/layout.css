@@ -1,0 +1,13 @@
+.app-shell { padding: 12px; }
+.app-header { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.top-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+nav { display: flex; gap: 10px; }
+section { background: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+.cards { display: flex; gap: 8px; margin: 8px 0; }
+.card { padding: 6px 8px; background: #eef3ff; border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ddd; padding: 4px 6px; }
+.modal { position: fixed; inset: 0; background: rgb(0 0 0 / 30%); display: grid; place-items: center; }
+.panel { background: #fff; padding: 12px; border-radius: 6px; min-width: 300px; }
+.card.danger { background: #ffd6d6; color: #a10000; font-weight: 700; }
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
