@@ -12,7 +12,7 @@
 
     <FqcCompleteTable :rows="realTimeData" @validate="validateInput" @complete="completeWorkOrder" />
     <button style="float:right" @click="updateAllRatings">提交</button>
-    <RatingTable :rows="ratingRows" :total="calculateTotalCompletedQty" @update-one="updateRatingDate" />
+    <RatingTable :rows="ratingRows" :total="calculateTotalCompletedQty" />
   </section>
 </template>
 
@@ -25,7 +25,7 @@ const {
   selectedArea, selectedD, selectedS, selectedC, selectedL, selectedDepartment,
   realTimeData, ratingRows, fetchData, fetchRatings,
   calculateTotalCompletedQty, validateInput,
-  completeWorkOrder, updateAllRatings, updateRatingDate,
+  completeWorkOrder, updateAllRatings,
 } = useFqcManage();
 
 const refresh = async () => {
