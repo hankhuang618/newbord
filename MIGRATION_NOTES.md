@@ -1,33 +1,93 @@
 # Migration Notes (`19board.html` -> Vue 3)
 
-## Module mapping
-- Realtime production board -> `src/views/RealtimeBoardView.vue`, `src/components/board/*`, `src/composables/useRealtimeBoard.js`
-- Work order management -> `src/views/WorkOrderManageView.vue`, `src/components/workorder/*`, `src/composables/useWorkOrderManage.js`
-- Staff management -> `src/views/StaffManageView.vue`, `src/components/staff/*`, `src/composables/useStaffManage.js`
-- FQC / rating -> `src/views/FqcManageView.vue`, `src/components/fqc/*`, `src/composables/useFqcManage.js`
-- Language switching -> `src/composables/useLanguage.js`, `src/locales/*`, `src/components/common/LanguageSwitcher.vue`
+## Legacy section -> Vue module mapping
 
-## API extraction
-- HTTP client: `src/api/http.js`
-- Realtime board endpoints: `src/api/boardApi.js`
-- Work order endpoints: `src/api/workOrderApi.js`
-- Staff endpoints: `src/api/staffApi.js`
-- FQC endpoints: `src/api/fqcApi.js`
+### 1) Realtime production board
+Legacy concerns:
+- area/department filters
+- online summary counters
+- realtime work-order list
+- station list
 
-All routes listed in the API service modules keep the original path strings from `19board.html`.
+Mapped files:
+- `src/views/RealtimeBoardView.vue`
+- `src/components/board/SummaryCards.vue`
+- `src/components/board/WorkOrderList.vue`
+- `src/components/board/StationList.vue`
+- `src/composables/useRealtimeBoard.js`
+- `src/api/boardApi.js`
 
-## TODO (legacy-behavior preservation backlog)
-- [ ] Port all remaining API integrations not yet surfaced by the four module service files (reference: `19board.html` axios/fetch calls around lines 2180-8123).
-- [ ] Port all modal flows and table cell interactions with legacy validation and confirmations.
-- [ ] Port report export flows (Excel/PDF/print) while preserving payload schemas.
-- [ ] Port advanced summary/table merge logic and monthly performance calculations.
-- [ ] Add parity checks for watcher/computed behavior from the legacy Vue2 instance.
+### 2) Work order management
+Legacy concerns:
+- work-order table actions (complete / pause / rework / rework-date adjust)
+- ERP query/import flow
+- modal flows for pause reason and rework date
 
-## Checklist
-- [x] Vue 3 scaffold and runnable app
-- [x] Router-based views by major feature area
-- [x] API modules created under `/src/api`
-- [x] Shared components/composables/utils folders created
-- [x] Styles split into base/layout/page files
-- [x] README startup instructions
-- [x] Migration notes + TODO backlog
+Mapped files:
+- `src/views/WorkOrderManageView.vue`
+- `src/components/workorder/WorkOrderTable.vue`
+- `src/components/workorder/ERPQueryPanel.vue`
+- `src/components/workorder/PauseReasonModal.vue`
+- `src/components/workorder/ReworkDateModal.vue`
+- `src/composables/useWorkOrderManage.js`
+- `src/api/workOrderApi.js`
+
+### 3) Staff management
+Legacy concerns:
+- add/edit/delete staff
+- show/hide toggle
+- status update flow and HR cancellation
+
+Mapped files:
+- `src/views/StaffManageView.vue`
+- `src/components/staff/StaffToolbar.vue`
+- `src/components/staff/StaffForm.vue`
+- `src/components/staff/StaffTable.vue`
+- `src/composables/useStaffManage.js`
+- `src/api/staffApi.js`
+
+### 4) FQC / completion quantity
+Legacy concerns:
+- completion quantity entry and validation
+- single completion submit
+- per-row rating update
+- bulk rating update
+
+Mapped files:
+- `src/views/FqcManageView.vue`
+- `src/components/fqc/FqcCompleteTable.vue`
+- `src/components/fqc/RatingTable.vue`
+- `src/composables/useFqcManage.js`
+- `src/api/fqcApi.js`
+
+### 5) Language switching
+Mapped files:
+- `src/components/common/LanguageSwitcher.vue`
+- `src/composables/useLanguage.js`
+- `src/locales/zh-TW.js`
+- `src/locales/en-US.js`
+- `src/locales/vi-VN.js`
+
+## API extraction summary
+- Shared HTTP client: `src/api/http.js`
+- Board APIs: `src/api/boardApi.js`
+- Work-order APIs: `src/api/workOrderApi.js`
+- Staff APIs: `src/api/staffApi.js`
+- FQC APIs: `src/api/fqcApi.js`
+
+All API paths in these modules are kept as legacy endpoint strings.
+
+## Parity checklist
+- [x] Vue 3 app scaffold and router
+- [x] Core feature-group views exist (Realtime/WorkOrder/Staff/FQC)
+- [x] API modules extracted under `src/api`
+- [x] Major tables, modals, filters, and action handlers represented in module structure
+- [x] Multilingual resources and switcher module exist
+- [x] README startup instructions and module map
+- [x] Migration notes map legacy sections to new files
+
+## TODO (explicit non-silent backlog)
+- [ ] Complete full string-level i18n parity for all legacy labels/messages.
+- [ ] Port remaining legacy report/export workflows (Excel/PDF/print).
+- [ ] Port remaining legacy watcher/computed edge cases not yet represented in composables.
+- [ ] Add automated parity tests for critical API payload/response handling.
