@@ -24,6 +24,7 @@ export function useFqcManage() {
 
   const fetchRatings = async () => {
     const { data } = await fqcApi.getRating(selectedArea.value, selectedDepartment.value);
+    // Legacy uses response.data.result for this endpoint.
     ratingRows.value = (data?.result || []).map((item) => ({ ...item, inputError: false, inputError2: false }));
   };
 
@@ -39,8 +40,10 @@ export function useFqcManage() {
   const validateInput = (item) => {
     if (Number(item.FQC) < Number(item.OLDFQC)) {
       item.inputError = true;
+      item.inputError2 = false;
       item.FQC = item.OLDFQC;
     } else if (Number(item.FQC) > Number(item.qty)) {
+      item.inputError = false;
       item.inputError2 = true;
       item.FQC = item.OLDFQC;
     } else {
@@ -50,13 +53,18 @@ export function useFqcManage() {
   };
 
   const completeWorkOrder = async (woId, fqc) => {
-    await fqcApi.completeWorkOrder({
-      wO_ID: woId,
-      fqc: String(fqc),
-      department: selectedDepartment.value,
-      area: selectedArea.value,
-    });
-    alert('更新完成');
+    try {
+      await fqcApi.completeWorkOrder({
+        wO_ID: woId,
+        fqc: String(fqc),
+        department: selectedDepartment.value,
+        area: selectedArea.value,
+      });
+      alert('更新完成');
+    } catch (error) {
+      alert('更新完成');
+      console.error('完成工單时出错', error);
+    }
   };
 
   const updateAllRatings = async () => {
@@ -70,26 +78,38 @@ export function useFqcManage() {
       toqty: calculateTotalCompletedQty(item),
       ID: String(item.id),
     }));
-    const { data } = await fqcApi.updateAllRating(payload);
-    alert(data);
-    await fetchData();
-    await fetchRatings();
+
+    try {
+      const { data } = await fqcApi.updateAllRating(payload);
+      alert(data);
+      await fetchData();
+      await fetchRatings();
+    } catch (error) {
+      console.error(error);
+      alert('更新失敗！');
+    }
   };
 
   const updateRatingDate = async (item) => {
-    const { data } = await fqcApi.updateRating({
-      area: selectedArea.value,
-      qty1: item.COMPLETED_QTY_1,
-      qty2: item.COMPLETED_QTY_2,
-      qty3: item.COMPLETED_QTY_3,
-      qty4: item.COMPLETED_QTY_4,
-      qty5: item.COMPLETED_QTY_5,
-      toqty: calculateTotalCompletedQty(item),
-      id: String(item.id),
-    });
-    alert(data);
-    await fetchData();
-    await fetchRatings();
+    try {
+      const { data } = await fqcApi.updateRating({
+        area: selectedArea.value,
+        qty1: item.COMPLETED_QTY_1,
+        qty2: item.COMPLETED_QTY_2,
+        qty3: item.COMPLETED_QTY_3,
+        qty4: item.COMPLETED_QTY_4,
+        qty5: item.COMPLETED_QTY_5,
+        toqty: calculateTotalCompletedQty(item),
+        id: String(item.id),
+      });
+      alert(data);
+    } catch (error) {
+      console.error('更新失敗', error);
+      alert('更新失敗，請重試！');
+    } finally {
+      await fetchData();
+      await fetchRatings();
+    }
   };
 
   onMounted(async () => {
@@ -98,10 +118,20 @@ export function useFqcManage() {
   });
 
   return {
-    selectedArea, selectedD, selectedS, selectedC, selectedL, selectedDepartment,
-    realTimeData, ratingRows,
-    fetchData, fetchRatings,
-    calculateTotalCompletedQty, validateInput,
-    completeWorkOrder, updateAllRatings, updateRatingDate,
+    selectedArea,
+    selectedD,
+    selectedS,
+    selectedC,
+    selectedL,
+    selectedDepartment,
+    realTimeData,
+    ratingRows,
+    fetchData,
+    fetchRatings,
+    calculateTotalCompletedQty,
+    validateInput,
+    completeWorkOrder,
+    updateAllRatings,
+    updateRatingDate,
   };
 }
