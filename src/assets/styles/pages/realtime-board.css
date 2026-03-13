@@ -1,1 +1,14 @@
-/* page scoped styles placeholder */
+.realtime-page { background:#d9d9d9; border-radius:10px; padding:8px; }
+.legacy-header { display:flex; justify-content:space-between; align-items:center; font-weight:700; }
+.left-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.logo { font-size:48px; font-weight:800; }
+.board-title { text-align:center; margin:4px 0; }
+.online { text-align:center; font-size:32px; font-weight:700; margin-bottom:8px; }
+.quick-actions { display:flex; gap:10px; margin:8px 0; }
+.quick-actions button, .switch-row button { background:#e3a23a; border:0; color:#fff; padding:10px 18px; border-radius:6px; font-weight:700; }
+.switch-row { display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin:8px 0; }
+.legacy-table { width:100%; border-collapse:collapse; margin:6px 0 14px; }
+.legacy-table th { background:#6b675d; color:#fff; border:2px solid #ddd; padding:6px; }
+.legacy-table td { background:#f1f1f1; border:2px solid #ddd; text-align:center; padding:6px; }
+.legacy-table tfoot th { background:#6b675d; color:#fff; }
+.danger { background:#f00; color:#fff; border-radius:4px; padding:2px 6px; display:inline-block; min-width:72px; }

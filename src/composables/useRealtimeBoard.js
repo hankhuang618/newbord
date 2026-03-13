@@ -26,6 +26,8 @@ function setCookie(name, value, days) {
   document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
 }
 
+const safe = (n) => Number(n || 0);
+
 export function useRealtimeBoard() {
   const selectedArea = ref(getCookie('selectedArea') || 'VN');
   const selectedD = ref(getCookie('selectedD') || '1');
@@ -55,7 +57,7 @@ export function useRealtimeBoard() {
 
   const fetchOnlineData = async () => {
     const { data } = await boardApi.getOnline(selectedArea.value, selectedDepartment.value);
-    onlineData.value = data;
+    onlineData.value = data || [];
   };
 
   const fetchDPData = async () => {
@@ -89,6 +91,68 @@ export function useRealtimeBoard() {
     }
   };
 
+  const productionRows = computed(() => realTimeData.value.filter((r) => r.Trans_id !== 'LOT_PAUSE').map((row) => {
+    const workHours = safe(row.time).toFixed(2);
+    const standardQty = Math.round((safe(row.qty) / (safe(row.std) || 1)) * safe(row.time));
+    const actualQty = safe(row.FQC);
+    const efficiency = safe(row.time) > 0 ? (((actualQty / safe(row.time)) / (safe(row.qty) / (safe(row.std) || 1))) * 100).toFixed(2) : '0.00';
+    return {
+      ...row,
+      timeRange: row.time ? '8:00-10:00' : '-',
+      people: 25,
+      workHours,
+      inputHours: workHours,
+      standardQty: Number.isFinite(standardQty) ? standardQty : 0,
+      actualQty,
+      efficiency,
+      ngQty: safe(row.NG),
+    };
+  }));
+
+  const summary = computed(() => {
+    const rows = productionRows.value;
+    const inputHours = rows.reduce((s, r) => s + safe(r.inputHours), 0);
+    const standardQty = rows.reduce((s, r) => s + safe(r.standardQty), 0);
+    const actualQty = rows.reduce((s, r) => s + safe(r.actualQty), 0);
+    const ngQty = rows.reduce((s, r) => s + safe(r.ngQty), 0);
+    return {
+      people: rows.reduce((s, r) => s + safe(r.people), 0),
+      workHours: inputHours.toFixed(2),
+      inputHours: inputHours.toFixed(2),
+      standardQty,
+      actualQty,
+      efficiency: standardQty > 0 ? ((actualQty / standardQty) * 100).toFixed(2) : '0.00',
+      ngQty,
+      line: rows.reduce((s, r) => s + safe(r.LINE), 0),
+      md: rows.reduce((s, r) => s + safe(r.MD), 0),
+      weld: rows.reduce((s, r) => s + safe(r.WELD), 0),
+    };
+  });
+
+  const productSummary = computed(() => {
+    const grouped = new Map();
+    productionRows.value.forEach((r) => {
+      const key = r.PART_DESC || '-';
+      if (!grouped.has(key)) grouped.set(key, { partDesc: key, inputHours: 0, standardQty: 0, actualQty: 0, ngQty: 0 });
+      const g = grouped.get(key);
+      g.inputHours += safe(r.inputHours);
+      g.standardQty += safe(r.standardQty);
+      g.actualQty += safe(r.actualQty);
+      g.ngQty += safe(r.ngQty);
+    });
+    return [...grouped.values()].map((g) => ({
+      ...g,
+      inputHours: g.inputHours.toFixed(2),
+      ngRate: g.actualQty > 0 ? ((g.ngQty / g.actualQty) * 100).toFixed(2) : '0.00',
+      efficiency: g.standardQty > 0 ? ((g.actualQty / g.standardQty) * 100).toFixed(2) : '0.00',
+    }));
+  });
+
+  const onlineCount = computed(() => {
+    if (!onlineData.value.length) return 0;
+    return safe(onlineData.value[0]?.在線人數);
+  });
+
   const refreshTick = async () => {
     currentTime.value = new Date().toLocaleTimeString();
     await fetchData();
@@ -119,6 +183,10 @@ export function useRealtimeBoard() {
     effOver,
     loading,
     currentTime,
+    productionRows,
+    summary,
+    productSummary,
+    onlineCount,
     saveFilters,
     fetchData,
     fetchOnlineData,
